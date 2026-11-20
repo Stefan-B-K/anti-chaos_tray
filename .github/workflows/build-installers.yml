@@ -81,7 +81,7 @@ jobs:
 
           jpackage \
             --type "${{ matrix.jpackage_type }}" \
-            --name "AntiChaosNotifications" \
+            --name "AntiChaos Notifications" \
             --app-version "0.1.0" \
             --vendor "Stefan Kozhuharov" \
             --input staging \
