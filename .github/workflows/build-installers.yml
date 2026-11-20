@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p staging dist
-          cp build/libs/anti-chaos_tray-0.1.0-all.jar staging/app.jar
+          cp build/libs/anti-chaos_tray-1.0.0-all.jar staging/app.jar
 
       - name: Package installer with jpackage
         shell: bash
@@ -82,7 +82,7 @@ jobs:
           jpackage \
             --type "${{ matrix.jpackage_type }}" \
             --name "AntiChaos Notifications" \
-            --app-version "0.1.0" \
+            --app-version "1.0.0" \
             --vendor "Stefan Kozhuharov" \
             --input staging \
             --dest dist \
