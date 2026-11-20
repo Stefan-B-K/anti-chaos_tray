@@ -20,7 +20,7 @@ public class TrayApp {
         SwingUtilities.invokeLater(() -> {
             if (!SystemTray.isSupported()) {
                 System.err.println("SystemTray is not supported on this platform/desktop environment.");
-                return;
+//                return;
             }
 
             try {
