@@ -31,11 +31,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
           architecture: ${{ matrix.arch }}
 
       - name: Install Linux packaging tools (Ubuntu)
@@ -52,8 +52,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p staging dist
-          # Adjust if your Gradle JAR task produces a different filename
-          cp build/libs/tray-app-0.1.0-all.jar staging/app.jar
+          cp build/libs/anti-chaos_tray-0.1.0-all.jar staging/app.jar
 
       - name: Package installer with jpackage
         shell: bash
@@ -69,17 +68,17 @@ jobs:
 
           jpackage \
             --type "${{ matrix.jpackage_type }}" \
-            --name "MyTrayApp" \
+            --name "AntiChaosNotifications" \
             --app-version "0.1.0" \
-            --vendor "Example" \
+            --vendor "Stefan Kozhuharov" \
             --input staging \
             --dest dist \
             --main-jar app.jar \
-            --main-class com.example.trayapp.TrayApp \
+            --main-class space.istef.TrayApp \
             "${EXTRA_ARGS[@]}"
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MyTrayApp-${{ runner.os }}-${{ matrix.arch }}
+          name: AntiChaosNotifications-${{ runner.os }}-${{ matrix.arch }}
           path: ${{ matrix.artifact_pattern }}

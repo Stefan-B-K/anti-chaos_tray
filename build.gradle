@@ -1,9 +1,11 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.gradleup.shadow' version '9.6.1'
 }
 
 group = 'space.istef'
+def appName = 'TrayApp'
 version = '0.1.0'
 
 java {
@@ -13,7 +15,7 @@ java {
 }
 
 application {
-    mainClass = 'space.istef.Main'
+    mainClass = "${group}.${appName}"
     // Keeps the app out of the macOS Dock when running as a tray utility
     applicationDefaultJvmArgs = ['-Dapple.awt.UIElement=true']
 }
@@ -23,4 +25,10 @@ repositories {
 }
 
 dependencies {
+}
+
+shadowJar {
+    archiveBaseName = rootProject.name
+    archiveClassifier = 'all'
+    manifest.attributes 'Main-Class': application.mainClass.get()
 }
