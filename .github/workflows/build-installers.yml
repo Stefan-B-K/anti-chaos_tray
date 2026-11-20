@@ -59,11 +59,24 @@ jobs:
         run: |
           EXTRA_ARGS=()
           if [ "${{ runner.os }}" = "macOS" ]; then
-            EXTRA_ARGS+=(--mac-app-category "Utilities" --java-options "-Dapple.awt.UIElement=true")
+            EXTRA_ARGS+=(
+              --icon "packaging/icons/icon.icns"
+              --mac-app-category "Utilities"
+              --java-options "-Dapple.awt.UIElement=true"
+            )
           elif [ "${{ runner.os }}" = "Windows" ]; then
-            EXTRA_ARGS+=(--win-menu --win-shortcut --java-options "-Dapple.awt.UIElement=true")
+            EXTRA_ARGS+=(
+              --icon "packaging/icons/icon.ico"
+              --win-menu
+              --win-shortcut
+              --java-options "-Dapple.awt.UIElement=true"
+            )
           elif [ "${{ runner.os }}" = "Linux" ]; then
-            EXTRA_ARGS+=(--linux-shortcut --java-options "-Dapple.awt.UIElement=true")
+            EXTRA_ARGS+=(
+              --icon "packaging/icons/icon.png"
+              --linux-shortcut
+              --java-options "-Dapple.awt.UIElement=true"
+            )
           fi
 
           jpackage \
