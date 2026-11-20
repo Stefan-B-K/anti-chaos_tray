@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'space.istef'
+version = '0.1.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    mainClass = 'space.istef.Main'
+    // Keeps the app out of the macOS Dock when running as a tray utility
+    applicationDefaultJvmArgs = ['-Dapple.awt.UIElement=true']
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
