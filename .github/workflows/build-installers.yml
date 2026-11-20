@@ -1,4 +1,4 @@
-name: Build Cross-Platform Installers
+name: Build Win/Mac/Lin Installers
 
 on:
   workflow_dispatch:
