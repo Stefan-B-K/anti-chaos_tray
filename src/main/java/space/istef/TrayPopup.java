@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.geom.RoundRectangle2D;
+import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -17,9 +18,11 @@ public class TrayPopup {
 
     private AppTheme theme;
     private JDialog dialog;
+    private final Consumer<Boolean> onVisibilityChanged;
 
-    public TrayPopup(AppTheme initialTheme) {
+    public TrayPopup(AppTheme initialTheme, Consumer<Boolean> onVisibilityChanged) {
         this.theme = initialTheme != null ? initialTheme : AppTheme.DARK;
+        this.onVisibilityChanged = onVisibilityChanged;
         this.dialog = buildDialog();
     }
 
@@ -42,23 +45,30 @@ public class TrayPopup {
         return theme;
     }
 
+    private void notifyVisibility(boolean visible) {
+        if (onVisibilityChanged != null) {
+            onVisibilityChanged.accept(visible);
+        }
+    }
+
     public void showNearPointer() {
         Point pointer = MouseInfo.getPointerInfo().getLocation();
         int x = pointer.x - dialog.getWidth() / 2;
         int y = pointer.y - dialog.getHeight() - 16;
         dialog.setLocation(Math.max(8, x), Math.max(16, y));
+        notifyVisibility(true);
         dialog.setVisible(true);
         dialog.toFront();
     }
 
     public void hide() {
         dialog.setVisible(false);
+        notifyVisibility(false);
     }
 
     public void dispose() {
-        if (dialog != null) {
-            dialog.dispose();
-        }
+        if (dialog != null) dialog.dispose();
+        notifyVisibility(false);
     }
 
     private JDialog buildDialog() {
@@ -106,7 +116,7 @@ public class TrayPopup {
 
             @Override
             public void windowLostFocus(WindowEvent e) {
-                popup.setVisible(false);
+                hide();
             }
         });
 

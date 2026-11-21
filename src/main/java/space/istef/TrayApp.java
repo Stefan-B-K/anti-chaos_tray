@@ -29,11 +29,14 @@ public class TrayApp {
             return;
         }
 
-        this.popup = new TrayPopup(AppTheme.of(currentMode));
-
         Image iconImage = loadTrayIconImage();
         TrayIcon trayIcon = new TrayIcon(iconImage, Messages.TRAY_TOOLTIP);
         trayIcon.setImageAutoSize(true);
+
+        this.popup = new TrayPopup(
+                AppTheme.of(currentMode),
+                visible -> trayIcon.setToolTip(visible ? null : Messages.TRAY_TOOLTIP)
+        );
 
         trayIcon.addMouseListener(new MouseAdapter() {
             @Override
