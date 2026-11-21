@@ -1,51 +1,76 @@
 package space.istef;
 
-import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
 import java.awt.AWTException;
 import java.awt.Image;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 
 public class TrayApp {
 
+    private AppTheme.Mode currentMode;
+    private TrayPopup popup;
+
     public static void main(String[] args) {
-        // Must be set before AWT initializes on macOS to avoid a Dock icon
-        System.setProperty("apple.awt.UIElement", "true");
+        SwingUtilities.invokeLater(() -> new TrayApp().start());
+    }
 
-        SwingUtilities.invokeLater(() -> {
-            if (!SystemTray.isSupported()) {
-                System.err.println("SystemTray is not supported on this platform/desktop environment.");
-                return;
-            }
+    public void start() {
+        this.currentMode = AppTheme.loadSavedMode();
 
-            try {
-                Image iconImage = loadTrayIcon(Messages.ICON_RESOURCE_PATH);
-                SystemTray tray = SystemTray.getSystemTray();
+        if (!SystemTray.isSupported()) {
+            // Optional fallback window when SystemTray is unavailable
+            return;
+        }
 
-                PopupMenu popup = new PopupMenu();
-                MenuItem exitItem = new MenuItem(Messages.MENU_EXIT);
-                popup.add(exitItem);
+        this.popup = new TrayPopup(AppTheme.of(currentMode));
 
-                TrayIcon trayIcon = new TrayIcon(iconImage, Messages.TRAY_TOOLTIP, popup);
-                trayIcon.setImageAutoSize(true);
+        Image iconImage = loadTrayIconImage();
+        TrayIcon trayIcon = new TrayIcon(iconImage, Messages.TRAY_TOOLTIP);
+        trayIcon.setImageAutoSize(true);
 
-                exitItem.addActionListener(e -> {
-                    tray.remove(trayIcon);
-                    System.exit(0);
-                });
-
-                tray.add(trayIcon);
-            } catch (IOException e) {
-                System.err.println("Failed to load tray icon: " + e.getMessage());
-            } catch (AWTException e) {
-                System.err.println("Failed to add TrayIcon: " + e.getMessage());
+        trayIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                popup.showNearPointer();
             }
         });
+
+        try {
+            SystemTray.getSystemTray().add(trayIcon);
+        } catch (AWTException ex) {
+            System.err.println("Failed to add tray icon: " + ex);
+        }
+    }
+
+    public AppTheme.Mode getCurrentMode() {
+        return currentMode;
+    }
+
+    public void switchTheme(AppTheme.Mode newMode) {
+        if (newMode == null || newMode == this.currentMode) {
+            return;
+        }
+        this.currentMode = newMode;
+        AppTheme.saveMode(newMode);
+        if (popup != null) {
+            popup.applyTheme(AppTheme.of(newMode));
+        }
+    }
+
+    private Image loadTrayIconImage() {
+        String iconPath = Messages.ICON_RESOURCE_PATH;
+        try {
+            return loadTrayIcon(iconPath);
+        } catch (IOException ex) {
+            throw new UncheckedIOException("Failed to load tray icon from " + iconPath, ex);
+        }
     }
 
     private static Image loadTrayIcon(String resourcePath) throws IOException {
