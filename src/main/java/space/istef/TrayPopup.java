@@ -1,14 +1,27 @@
 package space.istef;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -16,9 +29,17 @@ import javax.swing.JPanel;
 
 public class TrayPopup {
 
+    private static final int ARC = 7;
+
     private AppTheme theme;
-    private JDialog dialog;
+    private final JDialog dialog;
+    private JPanel contentPanel;
+    private final List<JButton> menuButtons = new ArrayList<>();
+    private final List<JPanel> separatorLines = new ArrayList<>();
     private final Consumer<Boolean> onVisibilityChanged;
+
+    private SettingsPopup settingsPopup;
+    private boolean notificationsEnabled = true;
 
     public TrayPopup(AppTheme initialTheme, Consumer<Boolean> onVisibilityChanged) {
         this.theme = initialTheme != null ? initialTheme : AppTheme.DARK;
@@ -30,14 +51,29 @@ public class TrayPopup {
         if (newTheme == null) {
             return;
         }
-        boolean wasVisible = dialog != null && dialog.isVisible();
-        if (dialog != null) {
-            dialog.dispose();
-        }
         this.theme = newTheme;
-        this.dialog = buildDialog();
-        if (wasVisible) {
-            showNearPointer();
+        dialog.getContentPane().setBackground(theme.surface);
+        if (contentPanel != null) {
+            contentPanel.setBackground(theme.surface);
+        }
+        for (JButton btn : menuButtons) {
+            btn.setForeground(theme.buttonFg);
+            btn.setBackground(theme.buttonBg);
+            btn.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(theme.buttonBg, 1, true),
+                    BorderFactory.createEmptyBorder(2, 8, 2, 8)
+            ));
+        }
+        for (JPanel line : separatorLines) {
+            line.setBackground(theme.border);
+        }
+        if (dialog.getWidth() > 0 && dialog.getHeight() > 0) {
+            dialog.setShape(new RoundRectangle2D.Float(0, 0, dialog.getWidth(), dialog.getHeight(), ARC, ARC));
+        }
+        dialog.repaint();
+
+        if (settingsPopup != null) {
+            settingsPopup.applyTheme(this.theme);
         }
     }
 
@@ -62,51 +98,60 @@ public class TrayPopup {
     }
 
     public void hide() {
+        if (settingsPopup != null) {
+            settingsPopup.hide();
+        }
         dialog.setVisible(false);
         notifyVisibility(false);
     }
 
     public void dispose() {
-        if (dialog != null) dialog.dispose();
+        if (settingsPopup != null) {
+            settingsPopup.dispose();
+        }
+        if (dialog != null) {
+            dialog.dispose();
+        }
         notifyVisibility(false);
     }
 
     private JDialog buildDialog() {
+        menuButtons.clear();
+        separatorLines.clear();
+
         JDialog popup = new JDialog((Frame) null);
         popup.setUndecorated(true);
         popup.setAlwaysOnTop(true);
         popup.setType(Window.Type.POPUP);
         popup.getContentPane().setBackground(theme.surface);
 
-        int arc = 7;
+        contentPanel = getJPanel(ARC);
+        popup.setContentPane(contentPanel);
 
-        JPanel content = getJPanel(arc);
-        popup.setContentPane(content);
-
-        JButton settingsBtn = createStyledButton(Messages.MENU_SETTINGS, theme,() -> {
-            popup.setVisible(false);
-            onSettingsClicked();
-        });
-
-        JButton uninstallBtn = createStyledButton(Messages.MENU_UNINSTALL, theme, () -> {
-            popup.setVisible(false);
+        // Keep TrayPopup visible when Settings opens on top of it
+        JButton settingsBtn = createStyledButton(Messages.MENU_SETTINGS, this::onSettingsClicked);
+        JButton uninstallBtn = createStyledButton(Messages.MENU_UNINSTALL, () -> {
+            hide();
             onUninstallClicked();
         });
-
-        JButton quitBtn = createStyledButton(Messages.MENU_QUIT,theme, () -> {
-            popup.dispose();
+        JButton quitBtn = createStyledButton(Messages.MENU_QUIT, () -> {
+            dispose();
             System.exit(0);
         });
 
-        addMenuItem(content, settingsBtn);
-        content.add(createHorizontalSeparator(theme, 2));
-        addMenuItem(content, uninstallBtn);
-        content.add(createHorizontalSeparator(theme,2));
-        addMenuItem(content, quitBtn);
+        menuButtons.add(settingsBtn);
+        menuButtons.add(uninstallBtn);
+        menuButtons.add(quitBtn);
+
+        addMenuItem(contentPanel, settingsBtn);
+        contentPanel.add(createHorizontalSeparator(2));
+        addMenuItem(contentPanel, uninstallBtn);
+        contentPanel.add(createHorizontalSeparator(2));
+        addMenuItem(contentPanel, quitBtn);
 
         popup.pack();
         if (popup.getWidth() > 0 && popup.getHeight() > 0) {
-            popup.setShape(new RoundRectangle2D.Float(0, 0, popup.getWidth(), popup.getHeight(), arc, arc));
+            popup.setShape(new RoundRectangle2D.Float(0, 0, popup.getWidth(), popup.getHeight(), ARC, ARC));
         }
 
         popup.addWindowFocusListener(new WindowFocusListener() {
@@ -132,7 +177,6 @@ public class TrayPopup {
                 try {
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     g2.setColor(theme.border);
-                    // Inset by 1px and subtract 2 from width/height so the stroke stays inside setShape
                     g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, arc, arc);
                 } finally {
                     g2.dispose();
@@ -147,7 +191,24 @@ public class TrayPopup {
     }
 
     private void onSettingsClicked() {
-        // Your settings action logic here
+        if (settingsPopup == null) {
+            settingsPopup = new SettingsPopup(
+                    theme,
+                    theme.mode == AppTheme.Mode.DARK,
+                    notificationsEnabled,
+                    darkSelected -> {
+                        AppTheme.Mode nextMode = darkSelected ? AppTheme.Mode.DARK : AppTheme.Mode.LIGHT;
+                        AppTheme.saveMode(nextMode);
+                        applyTheme(AppTheme.of(nextMode));
+                    },
+                    notifSelected -> {
+                        notificationsEnabled = notifSelected;
+                    }
+            );
+        } else {
+            settingsPopup.applyTheme(theme);
+        }
+        settingsPopup.showAlignedTopLeft(dialog);
     }
 
     private void onUninstallClicked() {
@@ -160,10 +221,7 @@ public class TrayPopup {
         container.add(button);
     }
 
-    private static JButton createStyledButton(String text, AppTheme activeTheme, Runnable onClick) {
-        Color normalBg = activeTheme.buttonBg;
-        Color hoverBg = activeTheme.buttonHoverBg;
-
+    private JButton createStyledButton(String text, Runnable onClick) {
         JButton button = new JButton(text) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -180,14 +238,14 @@ public class TrayPopup {
         };
 
         button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
-        button.setForeground(activeTheme.buttonFg);
-        button.setBackground(normalBg);
+        button.setForeground(theme.buttonFg);
+        button.setBackground(theme.buttonBg);
         button.setOpaque(false);
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(activeTheme.buttonBorder, 1, true),
+                BorderFactory.createLineBorder(theme.buttonBg, 1, true),
                 BorderFactory.createEmptyBorder(2, 8, 2, 8)
         ));
 
@@ -195,27 +253,27 @@ public class TrayPopup {
             @Override
             public void mouseEntered(MouseEvent e) {
                 if (button.isEnabled()) {
-                    button.setBackground(hoverBg);
+                    button.setBackground(theme.buttonHoverBg);
                     button.repaint();
                 }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                button.setBackground(normalBg);
+                button.setBackground(theme.buttonBg);
                 button.repaint();
             }
         });
 
         button.addActionListener(e -> {
-            button.setBackground(normalBg);
+            button.setBackground(theme.buttonBg);
             onClick.run();
         });
 
         return button;
     }
 
-    private static JPanel createHorizontalSeparator(AppTheme activeTheme, int verticalGap) {
+    private JPanel createHorizontalSeparator(int verticalGap) {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
         wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -223,10 +281,11 @@ public class TrayPopup {
 
         JPanel line = new JPanel();
         line.setOpaque(true);
-        line.setBackground(activeTheme.border);
+        line.setBackground(theme.border);
         line.setPreferredSize(new Dimension(0, 1));
         line.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
 
+        separatorLines.add(line);
         wrapper.add(line, BorderLayout.CENTER);
         wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, wrapper.getPreferredSize().height));
         return wrapper;

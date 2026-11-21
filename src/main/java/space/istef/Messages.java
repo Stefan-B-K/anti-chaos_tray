@@ -5,11 +5,14 @@ public final class Messages {
     private Messages() {
     }
 
-    public static final String APP_NAME = "Anci-Chaos Notifications";
+    public static final String APP_NAME = "Anti-Chaos Известия";
     public static final String TRAY_TOOLTIP = APP_NAME;
-    public static final String MENU_SETTINGS = "Settings";
-    public static final String MENU_UNINSTALL = "Uninstall";
-    public static final String MENU_QUIT = "Quit";
+    public static final String MENU_SETTINGS = "Настройки";
+    public static final String MENU_UNINSTALL = "Деинсталиране";
+    public static final String MENU_QUIT = "Изход";
+
+    public static final String MENU_DARK_MODE = "Тъмен режим";
+    public static final String MENU_NOTIFICATIONS = "Известия";
 
     public static final String ICON_RESOURCE_PATH = "/icons/tray-icon.png";
 }

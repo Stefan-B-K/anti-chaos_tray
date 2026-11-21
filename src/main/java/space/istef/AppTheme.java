@@ -17,7 +17,7 @@ public final class AppTheme {
             new Color(0x1E, 0x1E, 0x1E), // popup/window background
             new Color(0x44, 0x44, 0x44), // outer border
             new Color(0x1E, 0x1E, 0x1E), // button background
-            new Color(0x1E, 0x1E, 0x1E), // button border
+            new Color(0x56, 0x6E, 0xA3), // button border
             new Color(0x86, 0xAB, 0xFF), // button text
             new Color(0x2B, 0x37, 0x51)  // buttonHoverBg
     );
@@ -27,7 +27,7 @@ public final class AppTheme {
             new Color(0xF4, 0xF6, 0xFF), // popup/window background
             new Color(0xC7, 0xD3, 0xF1), // outer border
             new Color(0xF4, 0xF6, 0xFF), // button background
-            new Color(0xF4, 0xF6, 0xFF), // button border
+            new Color(0x88, 0xA9, 0xFD), // button border
             new Color(0x30, 0x65, 0xED), // button text
             new Color(0xDD, 0xDF, 0xF1)  // buttonHoverBg
     );
