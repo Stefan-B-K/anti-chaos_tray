@@ -23,6 +23,14 @@ public class TrayApp {
 
     public void start() {
         this.currentMode = AppTheme.loadSavedMode();
+        AppTheme activeTheme = AppTheme.of(currentMode);
+
+        LoginDialog loginDialog = new LoginDialog(activeTheme);
+        boolean loggedIn = loginDialog.showLoginDialog();
+        if (!loggedIn) {
+            System.exit(0);
+            return;
+        }
 
         if (!SystemTray.isSupported()) {
             // Optional fallback window when SystemTray is unavailable
@@ -34,7 +42,7 @@ public class TrayApp {
         trayIcon.setImageAutoSize(true);
 
         this.popup = new TrayPopup(
-                AppTheme.of(currentMode),
+                activeTheme,
                 visible -> trayIcon.setToolTip(visible ? null : Messages.TRAY_TOOLTIP)
         );
 
