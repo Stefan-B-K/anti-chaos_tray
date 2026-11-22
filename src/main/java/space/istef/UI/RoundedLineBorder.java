@@ -1,4 +1,4 @@
-package space.istef;
+package space.istef.UI;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

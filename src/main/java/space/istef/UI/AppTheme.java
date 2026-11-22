@@ -1,4 +1,6 @@
-package space.istef;
+package space.istef.UI;
+
+import space.istef.TrayApp;
 
 import java.awt.Color;
 import java.util.prefs.Preferences;

@@ -1,5 +1,9 @@
 package space.istef;
 
+import space.istef.UI.AppTheme;
+import space.istef.UI.LoginDialog;
+import space.istef.UI.TrayPopup;
+
 import java.awt.AWTException;
 import java.awt.Image;
 import java.awt.SystemTray;

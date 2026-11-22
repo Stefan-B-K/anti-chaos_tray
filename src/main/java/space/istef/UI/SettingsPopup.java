@@ -1,7 +1,8 @@
-package space.istef;
+package space.istef.UI;
+
+import space.istef.Messages;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
