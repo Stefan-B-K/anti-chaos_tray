@@ -18,6 +18,9 @@ public final class Messages {
     public static final String LABEL_PASSWORD = "Парола:";
     public static final String BUTTON_LOGIN = "Вход в системата";
     public static final String LABEL_FORGOT_PASSWORD = "Забравена парола";
+    // Forgot password dialog
+    public static final String LABEL_EMAIL = "е-поща:";
+    public static final String BUTTON_NEW_PASSWORD = "Заяви нова парола";
 
 
     public static final String ICON_RESOURCE_PATH = "/icons/tray-icon.png";

@@ -1,8 +1,5 @@
 package space.istef.UI;
 
-import space.istef.Messages;
-
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -10,17 +7,17 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.font.TextAttribute;
 import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -34,16 +31,17 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import space.istef.Messages;
 
 public class LoginDialog {
 
     private static final int CARD_WIDTH = 320;
     private static final int CARD_HEIGHT = 180;
-    private static final int CARD_ARC = 18;
+    private static final int CARD_ARC = CARD_HEIGHT / 10;
     private static final int INPUT_WIDTH = 190;
     private static final int INPUT_HEIGHT = 28;
     private static final int BUTTON_WIDTH = 190;
-    private static final int BUTTON_HEIGHT = 32;
+    private static final int BUTTON_HEIGHT = 30;
 
     private final JDialog dialog;
     private JTextField usernameField;
@@ -52,6 +50,9 @@ public class LoginDialog {
     private JButton loginButton;
     private boolean authenticated = false;
     private final AppTheme theme;
+
+    private final Font baseFont = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
+    private final Font underlinedFont = baseFont.deriveFont(underlinedAttrs());
 
     public LoginDialog(AppTheme theme) {
         this.theme = theme != null ? theme : AppTheme.DARK;
@@ -72,10 +73,18 @@ public class LoginDialog {
         d.setUndecorated(true);
         d.getContentPane().setBackground(theme.surface);
 
-        JPanel card = getJPanel();
+        JPanel card = UI.createCardPanel(
+                theme,
+                CARD_WIDTH,
+                CARD_HEIGHT,
+                18,
+                2,
+                2,
+                2
+        );
 
-        usernameField = createStyledTextField();
-        passwordField = createStyledPasswordField();
+        usernameField = UI.createTextField(theme, INPUT_WIDTH, INPUT_HEIGHT);
+        passwordField = UI.createPasswordField(theme, INPUT_WIDTH, INPUT_HEIGHT);
 
         JPanel usernameRow = createInputRow(Messages.LABEL_USERNAME, usernameField);
         JPanel passwordRow = createInputRow(Messages.LABEL_PASSWORD, passwordField);
@@ -87,51 +96,11 @@ public class LoginDialog {
         card.add(Box.createVerticalStrut(14));
         card.add(actionRow);
 
-        d.setContentPane(card);
-        d.pack();
-        if (d.getWidth() > 0 && d.getHeight() > 0) {
-            d.setShape(new RoundRectangle2D.Float(0, 0, d.getWidth(), d.getHeight(), CARD_ARC, CARD_ARC));
-        }
-
-        d.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        d.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                authenticated = false;
-                d.dispose();
-            }
+        UI.configureRoundedDialog(d, card, CARD_ARC, loginButton, () -> {
+            authenticated = false;
+            d.dispose();
         });
-
-        d.getRootPane().setDefaultButton(loginButton);
         return d;
-    }
-
-    private JPanel getJPanel() {
-        JPanel card = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g.create();
-                try {
-                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2.setColor(theme.surface);
-                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), CARD_ARC, CARD_ARC);
-                    g2.setColor(theme.border);
-                    g2.setStroke(new BasicStroke(1f));
-                    g2.drawRoundRect(-1, -1, getWidth(), getHeight(), CARD_ARC, CARD_ARC);
-                    g2.setColor(theme.buttonHoverBg);
-                    g2.setStroke(new BasicStroke(1f));
-                    g2.drawRoundRect(1, 1, getWidth(), getHeight(), CARD_ARC, CARD_ARC);
-                } finally {
-                    g2.dispose();
-                }
-            }
-        };
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setOpaque(false);
-        card.setPreferredSize(new Dimension(CARD_WIDTH, CARD_HEIGHT));
-        card.setBorder(BorderFactory.createEmptyBorder(18, 2, 2, 2));
-        return card;
     }
 
     private JPanel createInputRow(String labelText, JTextField field) {
@@ -151,32 +120,6 @@ public class LoginDialog {
         return row;
     }
 
-    private JTextField createStyledTextField() {
-        JTextField field = new JTextField();
-        applyFieldStyle(field);
-        return field;
-    }
-
-    private JPasswordField createStyledPasswordField() {
-        JPasswordField field = new JPasswordField();
-        applyFieldStyle(field);
-        return field;
-    }
-
-    private void applyFieldStyle(JTextField field) {
-        field.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-        field.setForeground(theme.buttonFg);
-        field.setBackground(theme.inputBg);
-        field.setCaretColor(theme.buttonFg);
-        field.setPreferredSize(new Dimension(INPUT_WIDTH, INPUT_HEIGHT));
-        field.setMinimumSize(new Dimension(INPUT_WIDTH, INPUT_HEIGHT));
-        field.setMaximumSize(new Dimension(INPUT_WIDTH, INPUT_HEIGHT));
-        field.setBorder(BorderFactory.createCompoundBorder(
-                new RoundedLineBorder(theme.inputBorder, 1, 12),
-                BorderFactory.createEmptyBorder(3, 7, 3, 7)
-        ));
-    }
-
     private JPanel createActionRow() {
         JPanel row = new JPanel(new BorderLayout(0, 0));
         row.setOpaque(false);
@@ -193,11 +136,11 @@ public class LoginDialog {
         errorLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         errorLabel.setForeground(theme.errorColor);
         errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        errorLabel.setPreferredSize(new Dimension(BUTTON_WIDTH, 12));
-        errorLabel.setMaximumSize(new Dimension(BUTTON_WIDTH, 12));
+        errorLabel.setPreferredSize(new Dimension(BUTTON_WIDTH, 11));
+        errorLabel.setMaximumSize(new Dimension(BUTTON_WIDTH, 11));
         errorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        loginButton = createOutlineButton(Messages.BUTTON_LOGIN);
+        loginButton = UI.createOutlineButton(theme, Messages.BUTTON_LOGIN, BUTTON_WIDTH, BUTTON_HEIGHT);
         loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         loginButton.addActionListener(e -> handleLogin());
 
@@ -206,11 +149,23 @@ public class LoginDialog {
         forgotLink.setForeground(theme.buttonFg);
         forgotLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         forgotLink.setAlignmentX(Component.CENTER_ALIGNMENT);
-        forgotLink.setBorder(BorderFactory.createEmptyBorder(2, 2, 0, 2));
+        forgotLink.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+        forgotLink.setBorder(BorderFactory.createEmptyBorder(6, 2, 0, 2));
         forgotLink.addMouseListener(new MouseAdapter() {
             @Override
+            public void mouseEntered(MouseEvent e) {
+                forgotLink.setFont(underlinedFont);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                forgotLink.setFont(baseFont);
+            }
+
+            @Override
             public void mouseClicked(MouseEvent e) {
-                errorLabel.setText("Reset link not configured");
+                dialog.dispose();
+                new ForgotPasswordDialog(dialog, theme).showDialog();
             }
         });
 
@@ -242,60 +197,6 @@ public class LoginDialog {
         return label;
     }
 
-    private JButton createOutlineButton(String text) {
-        JButton btn = new JButton(text) {
-            private boolean hovered = false;
-
-            {
-                addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        if (isEnabled()) {
-                            hovered = true;
-                            repaint();
-                        }
-                    }
-
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        hovered = false;
-                        repaint();
-                    }
-                });
-            }
-
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                try {
-                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    if (hovered && isEnabled()) {
-                        g2.setColor(theme.buttonHoverBg);
-                        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                    }
-                    g2.setColor(isEnabled() ? theme.buttonFg : theme.buttonFg.darker());
-                    g2.setStroke(new BasicStroke(1.1f));
-                    g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 8, 8);
-                } finally {
-                    g2.dispose();
-                }
-                super.paintComponent(g);
-            }
-        };
-
-        btn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-        btn.setForeground(theme.buttonFg);
-        btn.setOpaque(false);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
-        btn.setMinimumSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
-        btn.setMaximumSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
-        return btn;
-    }
-
     private void handleLogin() {
         String user = usernameField.getText().trim();
         char[] pass = passwordField.getPassword();
@@ -318,5 +219,11 @@ public class LoginDialog {
         }));
         timer.setRepeats(false);
         timer.start();
+    }
+
+    private Map<TextAttribute, Object> underlinedAttrs() {
+        Map<TextAttribute, Object> underlinedAttrs = new HashMap<>(baseFont.getAttributes());
+        underlinedAttrs.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+        return underlinedAttrs;
     }
 }
