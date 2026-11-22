@@ -21,6 +21,8 @@ public final class Messages {
     // Forgot password dialog
     public static final String LABEL_EMAIL = "е-поща:";
     public static final String BUTTON_NEW_PASSWORD = "Заяви нова парола";
+    public static final String STATUS_ERROR_INVALID_EMAIL = "Въведете валиден e-mail";
+    public static final String STATUS_SENDING = "Изпращане...";
 
 
     public static final String ICON_RESOURCE_PATH = "/icons/tray-icon.png";

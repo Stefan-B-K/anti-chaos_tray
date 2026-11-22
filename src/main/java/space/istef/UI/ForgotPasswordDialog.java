@@ -24,10 +24,10 @@ import javax.swing.Timer;
 public class ForgotPasswordDialog {
 
     private static final int CARD_WIDTH = 320;
-    private static final int CARD_HEIGHT = 135;
+    private static final int CARD_HEIGHT = 120;
     private static final int CARD_ARC = CARD_HEIGHT / 10;
     private static final int ROW_GAP = 8;
-    private static final int LABEL_WIDTH = 72;
+    private static final int LABEL_WIDTH = 52;
     private static final int INPUT_WIDTH = 190;
     private static final int INPUT_HEIGHT = 28;
     private static final int ROW_CONTENT_WIDTH = LABEL_WIDTH + ROW_GAP + INPUT_WIDTH;
@@ -59,7 +59,7 @@ public class ForgotPasswordDialog {
                 CARD_WIDTH,
                 CARD_HEIGHT,
                 22,
-                2,
+                28,
                 14,
                 2
         );
@@ -79,7 +79,7 @@ public class ForgotPasswordDialog {
     private JPanel createEmailRow(JTextField field) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, ROW_GAP, 0));
         row.setOpaque(false);
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+        row.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel label = new JLabel(Messages.LABEL_EMAIL);
         label.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
@@ -96,7 +96,7 @@ public class ForgotPasswordDialog {
     private JPanel createActionRow() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, ROW_GAP, 0));
         row.setOpaque(false);
-        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+        row.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JPanel column = new JPanel();
         column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
@@ -108,13 +108,13 @@ public class ForgotPasswordDialog {
                 ROW_CONTENT_WIDTH,
                 BUTTON_HEIGHT
         );
-        submitButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        submitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         submitButton.addActionListener(e -> handleRequestReset());
 
         statusLabel = new JLabel(" ");
         statusLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         statusLabel.setForeground(theme.errorColor);
-        statusLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         column.add(submitButton);
         column.add(Box.createVerticalStrut(4));
@@ -127,17 +127,17 @@ public class ForgotPasswordDialog {
 
     private void handleRequestReset() {
         String email = emailField.getText().trim();
-        if (email.isEmpty() || !email.contains("@")) {
+        if (!email.contains("@")) {
             statusLabel.setForeground(theme.errorColor);
-            statusLabel.setText("Въведете валиден e-mail");
+            statusLabel.setText(Messages.STATUS_ERROR_INVALID_EMAIL);
             return;
         }
 
         statusLabel.setForeground(theme.buttonFg);
-        statusLabel.setText("Изпращане...");
+        statusLabel.setText(Messages.STATUS_SENDING);
         submitButton.setEnabled(false);
 
-        Timer timer = new Timer(300, e -> SwingUtilities.invokeLater(() -> {
+        Timer timer = new Timer(1000, e -> SwingUtilities.invokeLater(() -> {
             dialog.dispose();
             System.exit(0);
         }));
