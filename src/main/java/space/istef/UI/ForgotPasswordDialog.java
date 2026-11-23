@@ -27,7 +27,7 @@ public class ForgotPasswordDialog {
     private static final int CARD_HEIGHT = 120;
     private static final int CARD_ARC = CARD_HEIGHT / 10;
     private static final int ROW_GAP = 8;
-    private static final int LABEL_WIDTH = 52;
+    private static final int LABEL_WIDTH = 54;
     private static final int INPUT_WIDTH = 190;
     private static final int INPUT_HEIGHT = 28;
     private static final int ROW_CONTENT_WIDTH = LABEL_WIDTH + ROW_GAP + INPUT_WIDTH;

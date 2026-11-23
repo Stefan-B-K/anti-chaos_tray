@@ -35,8 +35,8 @@ import space.istef.Messages;
 
 public class LoginDialog {
 
-    private static final int CARD_WIDTH = 320;
-    private static final int CARD_HEIGHT = 180;
+    private static final int CARD_WIDTH = 340;
+    private static final int CARD_HEIGHT = 190;
     private static final int CARD_ARC = CARD_HEIGHT / 10;
     private static final int INPUT_WIDTH = 190;
     private static final int INPUT_HEIGHT = 28;
@@ -77,7 +77,7 @@ public class LoginDialog {
                 theme,
                 CARD_WIDTH,
                 CARD_HEIGHT,
-                18,
+                6,
                 2,
                 2,
                 2
@@ -90,6 +90,8 @@ public class LoginDialog {
         JPanel passwordRow = createInputRow(Messages.LABEL_PASSWORD, passwordField);
         JPanel actionRow = createActionRow();
 
+        card.add(createCloseHeader(d));
+        card.add(Box.createVerticalStrut(0));
         card.add(usernameRow);
         card.add(Box.createVerticalStrut(14));
         card.add(passwordRow);
@@ -121,7 +123,7 @@ public class LoginDialog {
     }
 
     private JPanel createActionRow() {
-        JPanel row = new JPanel(new BorderLayout(0, 0));
+        JPanel row = new JPanel(new BorderLayout(-20, 0));
         row.setOpaque(false);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -130,6 +132,7 @@ public class LoginDialog {
 
         JPanel rightCol = new JPanel();
         rightCol.setLayout(new BoxLayout(rightCol, BoxLayout.Y_AXIS));
+        rightCol.setAlignmentX(Component.LEFT_ALIGNMENT);
         rightCol.setOpaque(false);
 
         errorLabel = new JLabel(" ");
@@ -219,6 +222,42 @@ public class LoginDialog {
         }));
         timer.setRepeats(false);
         timer.start();
+    }
+
+    private JPanel createCloseHeader(JDialog dialog) {
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel closeBtn = new JLabel("×");
+        closeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        closeBtn.setForeground(theme.buttonFg);
+        closeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        closeBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
+        closeBtn.setToolTipText("Close");
+
+        closeBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                closeBtn.setForeground(theme.buttonBorder);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                closeBtn.setForeground(theme.buttonFg);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                authenticated = false;
+                dialog.dispose();
+                System.exit(0);
+            }
+        });
+
+        header.add(closeBtn);
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, closeBtn.getPreferredSize().height));
+        return header;
     }
 
     private Map<TextAttribute, Object> underlinedAttrs() {
