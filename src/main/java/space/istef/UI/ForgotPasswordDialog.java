@@ -58,7 +58,7 @@ public class ForgotPasswordDialog {
                 theme,
                 CARD_WIDTH,
                 CARD_HEIGHT,
-                22,
+                2,
                 28,
                 14,
                 2
@@ -68,6 +68,8 @@ public class ForgotPasswordDialog {
         JPanel emailRow = createEmailRow(emailField);
         JPanel actionRow = createActionRow();
 
+        card.add(UI.createCloseHeader(d, theme));
+        card.add(Box.createVerticalStrut(0));
         card.add(emailRow);
         card.add(Box.createVerticalStrut(14));
         card.add(actionRow);

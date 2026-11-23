@@ -90,7 +90,7 @@ public class LoginDialog {
         JPanel passwordRow = createInputRow(Messages.LABEL_PASSWORD, passwordField);
         JPanel actionRow = createActionRow();
 
-        card.add(createCloseHeader(d));
+        card.add(UI.createCloseHeader(d, theme));
         card.add(Box.createVerticalStrut(0));
         card.add(usernameRow);
         card.add(Box.createVerticalStrut(14));
@@ -222,42 +222,6 @@ public class LoginDialog {
         }));
         timer.setRepeats(false);
         timer.start();
-    }
-
-    private JPanel createCloseHeader(JDialog dialog) {
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        header.setOpaque(false);
-        header.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel closeBtn = new JLabel("×");
-        closeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
-        closeBtn.setForeground(theme.buttonFg);
-        closeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        closeBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
-        closeBtn.setToolTipText("Close");
-
-        closeBtn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                closeBtn.setForeground(theme.buttonBorder);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                closeBtn.setForeground(theme.buttonFg);
-            }
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                authenticated = false;
-                dialog.dispose();
-                System.exit(0);
-            }
-        });
-
-        header.add(closeBtn);
-        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, closeBtn.getPreferredSize().height));
-        return header;
     }
 
     private Map<TextAttribute, Object> underlinedAttrs() {

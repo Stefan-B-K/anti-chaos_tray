@@ -1,25 +1,12 @@
 package space.istef.UI;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.RoundRectangle2D;
-import javax.swing.JDialog;
 
 public final class UI {
 
@@ -183,5 +170,40 @@ public final class UI {
         if (submitButton != null) {
             dialog.getRootPane().setDefaultButton(submitButton);
         }
+    }
+
+    public static JPanel createCloseHeader(JDialog dialog, AppTheme theme) {
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        header.setOpaque(false);
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel closeBtn = new JLabel("×");
+        closeBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        closeBtn.setForeground(theme.buttonFg);
+        closeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        closeBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
+        closeBtn.setToolTipText("Close");
+
+        closeBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                closeBtn.setForeground(theme.buttonBorder);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                closeBtn.setForeground(theme.buttonFg);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dialog.dispose();
+                System.exit(0);
+            }
+        });
+
+        header.add(closeBtn);
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, closeBtn.getPreferredSize().height));
+        return header;
     }
 }
