@@ -205,7 +205,7 @@ public class LoginDialog {
         char[] pass = passwordField.getPassword();
 
         if (user.isEmpty() || pass.length == 0) {
-            errorLabel.setText("Enter username and password");
+            errorLabel.setText(Messages.ERROR_EMPTY_INPUT);
             java.util.Arrays.fill(pass, '\0');
             return;
         }
