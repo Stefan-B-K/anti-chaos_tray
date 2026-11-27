@@ -32,6 +32,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import space.istef.Messages;
+import space.istef.auth.AuthService;
 
 public class LoginDialog {
 
@@ -50,12 +51,14 @@ public class LoginDialog {
     private JButton loginButton;
     private boolean authenticated = false;
     private final AppTheme theme;
+    private final AuthService authService;
 
     private final Font baseFont = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
     private final Font underlinedFont = baseFont.deriveFont(underlinedAttrs());
 
-    public LoginDialog(AppTheme theme) {
+    public LoginDialog(AppTheme theme, AuthService authService) {
         this.theme = theme != null ? theme : AppTheme.DARK;
+        this.authService = authService;
         this.dialog = buildDialog();
     }
 
@@ -210,18 +213,26 @@ public class LoginDialog {
             return;
         }
 
+        String password = new String(pass);
         java.util.Arrays.fill(pass, '\0');
         errorLabel.setText(" ");
         loginButton.setEnabled(false);
         loginButton.setText("...");
 
-        // Simulate brief login check, then close dialog and start tray app
-        Timer timer = new Timer(250, e -> SwingUtilities.invokeLater(() -> {
-            authenticated = true;
-            dialog.dispose();
-        }));
-        timer.setRepeats(false);
-        timer.start();
+        // Perform actual login via AuthService
+        new Thread(() -> {
+            boolean success = authService.login(user, password);
+            SwingUtilities.invokeLater(() -> {
+                if (success) {
+                    authenticated = true;
+                    dialog.dispose();
+                } else {
+                    errorLabel.setText("Login failed. Please check your credentials.");
+                    loginButton.setEnabled(true);
+                    loginButton.setText(Messages.BUTTON_LOGIN);
+                }
+            });
+        }).start();
     }
 
     private Map<TextAttribute, Object> underlinedAttrs() {
